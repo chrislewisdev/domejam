@@ -1,6 +1,7 @@
 import "dome" for Process, Window
 import "graphics" for Canvas, Color, ImageData
 import "input" for Keyboard
+import "./controls" for KeyMapping, Action, Controls
 
 var TILE_SIZE = 24
 var SPRITES = ImageData.loadFromFile("spritesheet.png")
@@ -33,42 +34,6 @@ class Game {
   }
 }
 
-class KeyMapping {
-  construct new(key) {
-    _key = key
-  }
-
-  isActivated() {
-    return Keyboard.isKeyDown(_key)
-  }
-}
-
-class Action {
-  construct new(action) {
-    _action = action
-    _mappings = []
-    _cooldown = 0
-  }
-
-  withMapping(mapping) {
-    _mappings.add(mapping)
-    return this
-  }
-
-  evaluate() {
-    if (_mappings.any{|mapping| mapping.isActivated()}) {
-      if (_cooldown == 0) {
-        _cooldown = 10
-        _action.call()
-      } else {
-        _cooldown = _cooldown - 1
-      }
-    } else {
-      _cooldown = 0
-    }
-  }
-}
-
 class GameInstance {
   construct new() {
     initMap()
@@ -76,10 +41,11 @@ class GameInstance {
     _x = 5
     _moveCooldown = 0
 
-    _left = Action.new(Fn.new{ moveLeft() }).
-              withMapping(KeyMapping.new("Left"))
-    _right = Action.new(Fn.new{ moveRight() }).
-              withMapping(KeyMapping.new("Right"))
+    _controls = Controls.new().
+      withAction(Action.new(Fn.new{ moveLeft() }).
+        withMapping(KeyMapping.new("Left"))).
+      withAction(Action.new(Fn.new{ moveRight() }).
+        withMapping(KeyMapping.new("Right")))
   }
 
   moveLeft() {
@@ -101,8 +67,7 @@ class GameInstance {
   }
 
   update() {
-    _left.evaluate()
-    _right.evaluate()
+    _controls.evaluate()
   }
 
   draw(dt) {

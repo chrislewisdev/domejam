@@ -63,13 +63,11 @@ class MatchSearcher {
   }
 
   isTileMatching(x, y) {
-    if (x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
-      if (_map[y][x] == _targetTile && !_candidates.contains(Point.new(x, y))) {
-        return true
-      }
-    }
+    if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_HEIGHT) return false
 
-    return false
+    if (_map[y][x] != _targetTile || _candidates.contains(Point.new(x, y))) return false
+
+    return true
   }
 }
 
@@ -87,6 +85,8 @@ class GameInstance {
         withMapping(KeyMapping.new("Right"))).
       withAction(Action.new(Fn.new{ placeBlock() }).
         withMapping(KeyMapping.new("Z")))
+
+    _dashOffset = 0
   }
 
   moveLeft() {
@@ -128,6 +128,9 @@ class GameInstance {
 
   update() {
     _controls.evaluate()
+
+    _dashOffset = _dashOffset + 0.5
+    if (_dashOffset > 12) _dashOffset = 0
   }
 
   getDropTarget() {
@@ -148,7 +151,32 @@ class GameInstance {
     drawCursor()
 
     var dropTarget = cellsToPixels(getDropTarget())
+    var linex = _x * TILE_SIZE + TILE_SIZE / 2
+    drawDashedLine(linex, TILE_SIZE, linex, dropTarget.y + TILE_SIZE / 2, _dashOffset)
     Canvas.rect(dropTarget.x, dropTarget.y, TILE_SIZE, TILE_SIZE, Color.white)
+  }
+
+  drawDashedLine(x0, y0, x1, y1, offset) {
+    var cursor = Point.new(x0, y0)
+    var end = Point.new(x1, y1)
+    var stepLength = 12
+
+    if (offset > 0) {
+      cursor = cursor + (end - cursor).unit * offset
+    }
+
+    while (cursor != end) {
+      var delta = end - cursor
+      if (delta.length < stepLength) {
+        Canvas.line(cursor.x, cursor.y, end.x, end.y, Color.white)
+        cursor = end
+        break
+      }
+
+      var lineEnd = cursor + delta.unit * stepLength / 2
+      Canvas.line(cursor.x, cursor.y, lineEnd.x, lineEnd.y, Color.white)
+      cursor = cursor + delta.unit * stepLength
+    }
   }
 
   drawMap() {

@@ -33,15 +33,30 @@ class Game {
   }
 }
 
-class Mapping {
-  construct new(button, action) {
-    _button = button
+class KeyMapping {
+  construct new(key) {
+    _key = key
+  }
+
+  isActivated() {
+    return Keyboard.isKeyDown(_key)
+  }
+}
+
+class Action {
+  construct new(action) {
     _action = action
+    _mappings = []
     _cooldown = 0
   }
 
+  withMapping(mapping) {
+    _mappings.add(mapping)
+    return this
+  }
+
   evaluate() {
-    if (Keyboard.isKeyDown(_button)) {
+    if (_mappings.any{|mapping| mapping.isActivated()}) {
       if (_cooldown == 0) {
         _cooldown = 10
         _action.call()
@@ -54,16 +69,6 @@ class Mapping {
   }
 }
 
-// class Controls {
-//   construct new() {
-//     _mappings = []
-//   }
-
-//   withMapping(button, action) {
-//     _mappings.add()
-//   }
-// }
-
 class GameInstance {
   construct new() {
     initMap()
@@ -71,11 +76,18 @@ class GameInstance {
     _x = 5
     _moveCooldown = 0
 
-    _left = Mapping.new("Left", Fn.new { moveLeft() })
+    _left = Action.new(Fn.new{ moveLeft() }).
+              withMapping(KeyMapping.new("Left"))
+    _right = Action.new(Fn.new{ moveRight() }).
+              withMapping(KeyMapping.new("Right"))
   }
 
   moveLeft() {
     if (_x > 0) _x = _x - 1
+  }
+
+  moveRight() {
+    if (_x < 11) _x = _x + 1
   }
 
   initMap() {
@@ -89,29 +101,11 @@ class GameInstance {
   }
 
   update() {
-    // if (Keyboard.isKeyDown("Left")) {
-    //   if (_moveCooldown == 0) {
-    //     _moveCooldown = 10
-    //     if (_x > 0) _x = _x - 1
-    //   } else {
-    //     _moveCooldown = _moveCooldown - 1
-    //   }
-    // } else if (Keyboard.isKeyDown("Right")) {
-    //   if (_moveCooldown == 0) {
-    //     _moveCooldown = 10
-    //     if (_x < 11) _x = _x + 1
-    //   } else {
-    //     _moveCooldown = _moveCooldown - 1
-    //   }
-    // } else {
-    //   _moveCooldown = 0
-    // }
     _left.evaluate()
+    _right.evaluate()
   }
 
   draw(dt) {
-    // drawDebugGrid()
-
     drawMap()
     drawCursor()
   }

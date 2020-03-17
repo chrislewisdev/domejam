@@ -21,6 +21,8 @@ class GameInstance {
         withMapping(KeyMapping.new("Z")))
 
     _dashOffset = 0
+
+    _animatedBlocks = []
   }
 
   moveLeft() {
@@ -43,10 +45,15 @@ class GameInstance {
 
     var matches = MatchSearcher.new(_map, cell).search()
     if (matches.count >= 3) {
+      animateBlocks(matches)
       for (c in matches) {
         _map[c.y][c.x] = null
       }
     }
+  }
+
+  animateBlocks(cells) {
+    _animatedBlocks = _animatedBlocks + cells.map{|cell| cellsToPixels(cell)}
   }
 
   initMap() {
@@ -65,6 +72,19 @@ class GameInstance {
 
     _dashOffset = _dashOffset + 0.5
     if (_dashOffset > 12) _dashOffset = 0
+
+    for (block in _animatedBlocks) {
+      var newPosition = moveTowards(block, Point.new(0, 0), 6)
+      block.x = newPosition.x
+      block.y = newPosition.y
+    }
+    _animatedBlocks = _animatedBlocks.where{|block| block != Point.new(0, 0)}.toList
+  }
+
+  moveTowards(origin, destination, stepLength) {
+    if ((destination - origin).length <= stepLength) return destination
+
+    return origin + (destination - origin).unit * stepLength
   }
 
   getDropTarget() {
@@ -88,5 +108,9 @@ class GameInstance {
     var linex = _x * Constants.tileSize + Constants.tileSize / 2
     Gfx.drawDashedLine(linex, Constants.tileSize, linex, dropTarget.y + Constants.tileSize / 2, _dashOffset)
     Canvas.rect(dropTarget.x, dropTarget.y, Constants.tileSize, Constants.tileSize, Color.white)
+
+    for (block in _animatedBlocks) {
+      Gfx.sprites.drawArea(0, 0, Constants.tileSize, Constants.tileSize, block.x, block.y)
+    }
   }
 }

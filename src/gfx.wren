@@ -35,7 +35,7 @@ class Gfx {
       for (y in 0...Constants.mapHeight) {
         var tile = map[y][x]
         if (tile) {
-          SPRITES.drawArea(tile * Constants.tileSize, 0, Constants.tileSize, Constants.tileSize, x * Constants.tileSize, (y + 1) * Constants.tileSize)
+          drawTile(tile, x * Constants.tileSize, (y + 1) * Constants.tileSize)
         }
       }
     }
@@ -49,7 +49,11 @@ class Gfx {
     }
   }
 
-  static drawCursor(x) {
-    SPRITES.drawArea(0, 0, Constants.tileSize, Constants.tileSize, x * Constants.tileSize, 0)
+  static drawTile(tile, x, y) {
+    SPRITES.drawArea(tile * Constants.tileSize, 0, Constants.tileSize, Constants.tileSize, x, y)
+  }
+
+  static drawCursor(tile, x) {
+    drawTile(tile, x * Constants.tileSize, 0)
   }
 }

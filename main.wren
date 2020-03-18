@@ -1,7 +1,10 @@
 import "dome" for Process, Window
 import "graphics" for Canvas, Color
 import "input" for Keyboard
+import "audio" for AudioEngine
 import "./src/gameInstance" for GameInstance
+
+// AudioEngine.load("music", "music.wav")
 
 /*
  * Entry point for our game. All of the 'real' code is in the src folder, this class just gets everything else up and running.
@@ -14,6 +17,8 @@ class Game {
     Canvas.resize(400, 240)
 
     __game = GameInstance.new()
+
+    // AudioEngine.play("music", 1, true)
   }
 
   static update() {

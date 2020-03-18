@@ -1,3 +1,4 @@
+import "dome" for Process
 import "graphics" for Canvas, Color
 import "math" for Math, Point
 import "./src/controls" for KeyMapping, Action, Controls
@@ -8,21 +9,26 @@ import "./src/gfx" for Gfx
 var MATCH_ANIMATION_TARGET = Point.new(360, 0)
 
 var LEVELS = [
-"
-dsbdsb
-xdsbdx
-xbdsbx
-",
-"
+["
+d___d
+xb_bx
+xsbsx
+xxxxx
+", 4, 3, 1],
+["
+s_s
+xxx
+", 1, 0, 0],
+["
 s_s
 b_b
 d_d
-",
-"
+", 1, 1, 1],
+["
 s_b
 b_s
 d_d
-",
+", 1, 1, 2],
 ]
 
 class Block {
@@ -38,6 +44,7 @@ class Block {
 
 class GameInstance {
   construct new() {
+    _tileAllowances = [0, 0, 0]
     loadLevel(0)
 
     _x = 5
@@ -49,9 +56,9 @@ class GameInstance {
       withAction(Action.new(Fn.new{ moveRight() }).
         withMapping(KeyMapping.new("Right"))).
       withAction(Action.new(Fn.new{ placeBlock() }).
-        withMapping(KeyMapping.new("Z"))).
+        withMapping(KeyMapping.new("Down"))).
       withAction(Action.new(Fn.new{ cycleTile() }).
-        withMapping(KeyMapping.new("X")))
+        withMapping(KeyMapping.new("Up")))
 
     _dashOffset = 0
 
@@ -74,14 +81,29 @@ class GameInstance {
     
     checkForAllMatches()
 
+    _tileAllowances[_tile] = _tileAllowances[_tile] - 1
+
     if (isLevelClear()) {
       loadLevel(_currentLevel + 1)
+    } else {
+      enforceAllowances()
     }
   }
 
   cycleTile() {
     _tile = _tile + 1
     if (_tile > 2) _tile = 0
+    enforceAllowances()
+  }
+
+  enforceAllowances() {
+    if (_tileAllowances.all{|allowance| allowance == 0}) {
+      loadLevel(_currentLevel)
+    }
+
+    while (_tileAllowances[_tile] == 0) {
+      cycleTile()
+    }
   }
 
   isLevelClear() {
@@ -93,15 +115,14 @@ class GameInstance {
     return true
   }
 
-  allCells() {
+  allCells {
     return (0...Constants.mapHeight).map{|y| (0...Constants.mapWidth).map{|x| Point.new(x, y) }.toList}.reduce{|acc, row| acc + row.toList }
   }
 
   checkForAllMatches() {
     var repeat = false
 
-    System.print(allCells())
-    for (cell in allCells()) {
+    for (cell in allCells) {
       if (checkForMatch(cell)) {
         shiftCellsDown()
         repeat = true
@@ -153,7 +174,11 @@ class GameInstance {
 
     _currentLevel = level
 
-    var levelString = LEVELS[level].trim()
+    var levelString = LEVELS[level][0].trim()
+    _tileAllowances[0] = LEVELS[level][1]
+    _tileAllowances[1] = LEVELS[level][2]
+    _tileAllowances[2] = LEVELS[level][3]
+
     var levelWidth = levelString.indexOf("\n") + 1
     if (levelWidth == 0) levelWidth = levelString.count
     var levelHeight = levelString.split("\n").count
@@ -224,10 +249,19 @@ class GameInstance {
     var dropTarget = cellsToPixels(getDropTarget())
     var linex = _x * Constants.tileSize + Constants.tileSize / 2
     Gfx.drawDashedLine(linex, Constants.tileSize, linex, dropTarget.y + Constants.tileSize / 2, _dashOffset)
-    Canvas.rect(dropTarget.x, dropTarget.y, Constants.tileSize, Constants.tileSize, Color.white)
+    Gfx.drawGhostTile(_tile, dropTarget.x, dropTarget.y)
 
     for (block in _animatedBlocks) {
       Gfx.drawTile(block.tile, block.point.x, block.point.y)
     }
+
+    Gfx.drawTile(0, 305, 80)
+    Canvas.print("x %(_tileAllowances[0])", 341, 88, Color.white)
+    Gfx.drawTile(1, 305, 130)
+    Canvas.print("x %(_tileAllowances[1])", 341, 138, Color.white)
+    Gfx.drawTile(2, 305, 180)
+    Canvas.print("x %(_tileAllowances[2])", 341, 188, Color.white)
+
+    Canvas.rect(295, 70 + _tile * 50, 85, 44, Color.white)
   }
 }

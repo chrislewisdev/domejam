@@ -15,6 +15,14 @@ class Action {
     _action = action
     _mappings = []
     _cooldown = 0
+    _cooldownLength = 15
+  }
+
+  construct new(action, cooldownLength) {
+    _action = action
+    _mappings = []
+    _cooldown = 0
+    _cooldownLength = cooldownLength
   }
 
   withMapping(mapping) {
@@ -25,7 +33,7 @@ class Action {
   evaluate() {
     if (_mappings.any{|mapping| mapping.isActivated()}) {
       if (_cooldown == 0) {
-        _cooldown = 10
+        _cooldown = _cooldownLength
         _action.call()
       } else {
         _cooldown = _cooldown - 1

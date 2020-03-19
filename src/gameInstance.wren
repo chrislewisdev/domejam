@@ -5,6 +5,7 @@ import "./src/controls" for KeyMapping, Action, Controls
 import "./src/matchSearcher" for MatchSearcher
 import "./src/constants" for Constants
 import "./src/gfx" for Gfx
+import "./src/sfx" for Sfx
 
 var MATCH_ANIMATION_TARGET = Point.new(360, 0)
 
@@ -55,7 +56,7 @@ class GameInstance {
         withMapping(KeyMapping.new("Left"))).
       withAction(Action.new(Fn.new{ moveRight() }).
         withMapping(KeyMapping.new("Right"))).
-      withAction(Action.new(Fn.new{ placeBlock() }).
+      withAction(Action.new(Fn.new{ placeBlock() }, 50).
         withMapping(KeyMapping.new("Down"))).
       withAction(Action.new(Fn.new{ cycleTile() }).
         withMapping(KeyMapping.new("Up")))
@@ -69,10 +70,12 @@ class GameInstance {
 
   moveLeft() {
     if (_x > 0) _x = _x - 1
+    Sfx.playMovementSound()
   }
 
   moveRight() {
     if (_x < Constants.mapWidth - 1) _x = _x + 1
+    Sfx.playMovementSound()
   }
 
   placeBlock() {
@@ -88,6 +91,8 @@ class GameInstance {
     } else {
       enforceAllowances()
     }
+
+    Sfx.playBlockDropSound()
   }
 
   cycleTile() {
@@ -124,6 +129,7 @@ class GameInstance {
 
     for (cell in allCells) {
       if (checkForMatch(cell)) {
+        Sfx.playMatchSound()
         shiftCellsDown()
         repeat = true
         break
@@ -220,6 +226,7 @@ class GameInstance {
     for (block in _animatedBlocks) {
       block.point = moveTowards(block.point, MATCH_ANIMATION_TARGET, 6)
     }
+    if (_animatedBlocks.any{|block| block.point == MATCH_ANIMATION_TARGET}) Sfx.playBlockDisappearSound()
     _animatedBlocks = _animatedBlocks.where{|block| block.point != MATCH_ANIMATION_TARGET}.toList
   }
 

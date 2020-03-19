@@ -4,6 +4,7 @@ import "input" for Keyboard
 import "audio" for AudioEngine
 import "./src/gameInstance" for GameInstance
 import "./src/controls" for Controls, Action, KeyMapping
+import "./src/gfx" for Gfx
 
 /*
  * Entry point for our game. All of the 'real' code is in the src folder, this class just gets everything else up and running.
@@ -15,6 +16,8 @@ class Game {
     Canvas.resize(400, 240)
     setScale(1)
 
+    __started = false
+
     __game = GameInstance.new()
 
     __controls = Controls.new().
@@ -23,11 +26,18 @@ class Game {
       withAction(Action.new(Fn.new{ setScale(2) }).
         withMapping(KeyMapping.new("2"))).
       withAction(Action.new(Fn.new{ setScale(3) }).
-        withMapping(KeyMapping.new("3")))
+        withMapping(KeyMapping.new("3"))).
+      withAction(Action.new(Fn.new{ startGame() }).
+        withMapping(KeyMapping.new("Z")).
+        withMapping(KeyMapping.new("X")))
   }
 
   static setScale(scale) {
     Window.resize(400 * scale, 240 * scale)
+  }
+
+  static startGame() {
+    if (!__started) __started = true
   }
 
   static update() {
@@ -36,17 +46,26 @@ class Game {
     }
 
     __controls.evaluate()
-    __game.update()
+
+    if (__started) __game.update()
   }
 
   static draw(dt) {
     Canvas.cls()
 
     Canvas.rect(0, 0, 400, 240, Color.white)
-
-    __game.draw(dt)
     
     Canvas.rect(0, 0, 288, 240, Color.white)
-    Canvas.print("SCORE: 0", 310, 10, Color.white)
+
+    if (__started) {
+      __game.draw(dt)
+    } else {
+      Canvas.print("Clean", 60, 60, Color.white)
+      Canvas.print("That", 80, 75, Color.white)
+      Canvas.print("Castle", 100, 90, Color.white)
+      Gfx.scale2x(60, 60, 150, 100)
+
+      Canvas.print("press z/x to start", 80, 180, Color.white)
+    }
   }
 }

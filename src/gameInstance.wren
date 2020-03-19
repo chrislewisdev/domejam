@@ -262,13 +262,13 @@ class GameInstance {
       Gfx.drawTile(block.tile, block.point.x, block.point.y)
     }
 
-    Gfx.drawTile(0, 305, 80)
-    Canvas.print("x %(_tileAllowances[0])", 341, 88, Color.white)
-    Gfx.drawTile(1, 305, 130)
-    Canvas.print("x %(_tileAllowances[1])", 341, 138, Color.white)
-    Gfx.drawTile(2, 305, 180)
-    Canvas.print("x %(_tileAllowances[2])", 341, 188, Color.white)
+    Gfx.drawTile(0, 310, 80)
+    Canvas.print("x %(_tileAllowances[0])", 346, 88, Color.white)
+    Gfx.drawTile(1, 310, 130)
+    Canvas.print("x %(_tileAllowances[1])", 346, 138, Color.white)
+    Gfx.drawTile(2, 310, 180)
+    Canvas.print("x %(_tileAllowances[2])", 346, 188, Color.white)
 
-    Canvas.rect(295, 70 + _tile * 50, 85, 44, Color.white)
+    Canvas.rect(300, 70 + _tile * 50, 85, 44, Color.white)
   }
 }

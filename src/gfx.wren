@@ -65,4 +65,13 @@ class Gfx {
   static drawCursor(tile, x) {
     drawTile(tile, x * Constants.tileSize, 0)
   }
+
+  static scale2x(x0, y0, x1, y1) {
+    for (x in x1..x0) {
+      for (y in y1..y0) {
+        var pixel = Canvas.pget(x, y)
+        Canvas.rectfill(x0 + (x - x0) * 2, y0 + (y - y0) * 2, 2, 2, pixel)
+      }
+    } 
+  }
 }

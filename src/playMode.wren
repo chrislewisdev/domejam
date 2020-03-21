@@ -24,9 +24,12 @@ class PlayMode {
       withAction(Action.new(Fn.new{ placeBlock() }, 50).
         withMapping(KeyMapping.new("Down"))).
       withAction(Action.new(Fn.new{ cycleTile() }).
-        withMapping(KeyMapping.new("Z")))
+        withMapping(KeyMapping.new("Z"))).
+      withAction(Action.new(Fn.new{ resetLevel() }).
+        withMapping(KeyMapping.new("X")))
 
     _dashOffset = 0
+    _ghostCycler = getCycler(0, 4, 5)
 
     _animatedBlocks = []
 
@@ -94,6 +97,10 @@ class PlayMode {
     enforceAllowances()
   }
 
+  resetLevel() {
+    _state.loadLevel(_state.currentLevel)
+  }
+
   waitForFrames(frames) {
     var waited = 0
     while (waited < frames) {
@@ -129,7 +136,7 @@ class PlayMode {
   shiftCellsDown() {
     for (y in (Constants.mapHeight - 1)..1) {
       for (x in 0...Constants.mapWidth) {
-        if (_state.getTile(x, y) == null && _state.getTile(x, y - 1) != null) {
+        if (_state.getTile(x, y) == null && _state.getTile(x, y - 1) != null && _state.getTile(x, y - 1) != 9) {
           _state.setTile(x, y, _state.getTile(x, y - 1))
           _state.setTile(x, y - 1, null)
         }
@@ -178,26 +185,46 @@ class PlayMode {
 
   draw(dt) {
     Gfx.drawMap(_state.map)
-    Gfx.drawCursor(_tile, _x)
 
     if (!_isPlacingBlock) {
+      Gfx.drawCursor(_tile, _x)
       var dropTarget = cellsToPixels(getDropTarget())
       var linex = _x * Constants.tileSize + Constants.tileSize / 2
       Gfx.drawDashedLine(linex, Constants.tileSize, linex, dropTarget.y + Constants.tileSize / 2, _dashOffset)
-      Gfx.drawGhostTile(_tile, dropTarget.x, dropTarget.y)
+      Gfx.drawGhostTile(_tile, dropTarget.x, dropTarget.y, _ghostCycler.call())
+      Canvas.print("%(_state.tileAllowances[_tile]) left", linex + 12, dropTarget.y / 2, Color.white)
     }
 
     for (block in _animatedBlocks) {
       Gfx.drawTile(block.tile, block.point.x, block.point.y)
     }
 
-    Gfx.drawTile(0, 310, 80)
-    Canvas.print("x %(_state.tileAllowances[0])", 346, 88, Color.white)
-    Gfx.drawTile(1, 310, 130)
-    Canvas.print("x %(_state.tileAllowances[1])", 346, 138, Color.white)
-    Gfx.drawTile(2, 310, 180)
-    Canvas.print("x %(_state.tileAllowances[2])", 346, 188, Color.white)
+    Canvas.print("<-/->: move", 295, 10, Color.white)
+    Canvas.print("down: drop", 295, 25, Color.white)
+    Canvas.print("z: next tile", 295, 40, Color.white)
+    Canvas.print("x: reset", 295, 55, Color.white)
 
-    Canvas.rect(300, 70 + _tile * 50, 85, 44, Color.white)
+    Gfx.drawTile(0, 310, 100)
+    Canvas.print("x %(_state.tileAllowances[0])", 346, 108, Color.white)
+    Gfx.drawTile(1, 310, 150)
+    Canvas.print("x %(_state.tileAllowances[1])", 346, 158, Color.white)
+    Gfx.drawTile(2, 310, 200)
+    Canvas.print("x %(_state.tileAllowances[2])", 346, 208, Color.white)
+
+    Canvas.rect(300, 90 + _tile * 50, 85, 44, Color.white)
+  }
+
+  getCycler(min, max, cycleDuration) {
+    var value = min
+    var timer = cycleDuration
+    return Fn.new {
+      timer = timer - 1
+      if (timer <= 0) {
+        value = value + 1
+        if (value > max) value = min
+        timer = cycleDuration
+      }
+      return value
+    }
   }
 }

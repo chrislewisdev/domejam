@@ -53,11 +53,11 @@ class Gfx {
     SPRITES.drawArea(tile * Constants.tileSize, 0, Constants.tileSize, Constants.tileSize, x, y)
   }
 
-  static drawGhostTile(tile, x, y) {
+  static drawGhostTile(tile, x, y, cycleOffset) {
     drawTile(tile, x, y)
     for (ty in y...y+24) {
       for (tx in x...x+24) {
-        if ((ty + tx) % 3 == 0) Canvas.pset(tx, ty, Color.black)
+        if ((ty + tx + cycleOffset) % 5 == 0) Canvas.pset(tx, ty, Color.black)
       }
     }
   }

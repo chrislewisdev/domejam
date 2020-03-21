@@ -7,7 +7,7 @@ import "./src/gfx" for Gfx
 import "./src/sfx" for Sfx
 import "./src/block" for Block
 
-var MATCH_ANIMATION_TARGET = Point.new(360, 0)
+var MATCH_ANIMATION_TARGET = Point.new(0, 0)
 
 class PlayMode {
   construct new(state, gameInstance) {
@@ -65,6 +65,7 @@ class PlayMode {
         Sfx.playMatchSound()
         waitForFrames(30)
         shiftCellsDown()
+        waitForFrames(30)
       }
 
       if (_state.isLevelClear()) {

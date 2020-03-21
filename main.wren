@@ -2,7 +2,7 @@ import "dome" for Process, Window
 import "graphics" for Canvas, Color
 import "input" for Keyboard
 import "audio" for AudioEngine
-import "./src/gameInstance" for GameInstance
+import "./src/gameInstance" for GameInstance, GameState
 import "./src/controls" for Controls, Action, KeyMapping
 import "./src/gfx" for Gfx
 
@@ -62,8 +62,8 @@ class Game {
     } else {
       Canvas.print("Clean", 60, 60, Color.white)
       Canvas.print("That", 80, 75, Color.white)
-      Canvas.print("Castle", 100, 90, Color.white)
-      Gfx.scale2x(60, 60, 150, 100)
+      Canvas.print("Castle!", 100, 90, Color.white)
+      Gfx.scale2x(60, 60, 160, 100)
 
       Canvas.print("press z/x to start", 80, 180, Color.white)
     }

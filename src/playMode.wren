@@ -31,6 +31,9 @@ class PlayMode {
     _animatedBlocks = []
 
     _tile = 0
+    _isPlacingBlock = false
+
+    _fibers = []
   }
 
   moveLeft() {
@@ -45,19 +48,44 @@ class PlayMode {
 
   placeBlock() {
     var target = getDropTarget()
-    if (target.y >= 0) _state.setTile(target.x, target.y, _tile)
-    
-    checkForAllMatches()
 
-    _state.tileAllowances[_tile] = _state.tileAllowances[_tile] - 1
+    if (target.y < 0 || _isPlacingBlock) return
 
-    if (_state.isLevelClear()) {
-      _gameInstance.startNextLevel()
-    } else {
+    _fibers.add(Fiber.new {
+      _isPlacingBlock = true
+      _state.tileAllowances[_tile] = _state.tileAllowances[_tile] - 1
+      _state.setTile(target.x, target.y, _tile)
+      
+      Sfx.playBlockDropSound()
+
+      while (checkForAllMatches()) {
+        Sfx.playMatchSound()
+        waitForFrames(30)
+        shiftCellsDown()
+      }
+
+      if (_state.isLevelClear()) {
+        waitForFrames(60)
+        _gameInstance.startNextLevel()
+      } else if (_state.isLevelFailed()) {
+        waitForFrames(60)
+        _gameInstance.levelFailed()
+      }
+
       enforceAllowances()
+
+      _isPlacingBlock = false
+    })
+  }
+
+  checkForAllMatches() {
+    for (cell in _state.allCells) {
+      if (checkForMatch(cell)) {
+        return true
+      }
     }
 
-    Sfx.playBlockDropSound()
+    return false
   }
 
   cycleTile() {
@@ -66,30 +94,18 @@ class PlayMode {
     enforceAllowances()
   }
 
-  enforceAllowances() {
-    if (_state.tileAllowances.all{|allowance| allowance == 0}) {
-      _gameInstance.levelFailed()
-      return
-    }
-
-    while (_state.tileAllowances[_tile] == 0) {
-      cycleTile()
+  waitForFrames(frames) {
+    var waited = 0
+    while (waited < frames) {
+      waited = waited + 1
+      Fiber.yield()
     }
   }
 
-  checkForAllMatches() {
-    var repeat = false
-
-    for (cell in _state.allCells) {
-      if (checkForMatch(cell)) {
-        Sfx.playMatchSound()
-        shiftCellsDown()
-        repeat = true
-        break
-      }
+  enforceAllowances() {
+    while (_state.tileAllowances[_tile] == 0 && _state.tileAllowances.any{|allowance| allowance != 0}) {
+      cycleTile()
     }
-
-    if (repeat) checkForAllMatches()
   }
 
   checkForMatch(cell) {
@@ -128,6 +144,9 @@ class PlayMode {
   update() {
     _controls.evaluate()
 
+    _fibers.each{|fiber| fiber.call()}
+    _fibers = _fibers.where{|fiber| !fiber.isDone}.toList
+
     _dashOffset = _dashOffset + 0.5
     if (_dashOffset > 12) _dashOffset = 0
 
@@ -161,10 +180,12 @@ class PlayMode {
     Gfx.drawMap(_state.map)
     Gfx.drawCursor(_tile, _x)
 
-    var dropTarget = cellsToPixels(getDropTarget())
-    var linex = _x * Constants.tileSize + Constants.tileSize / 2
-    Gfx.drawDashedLine(linex, Constants.tileSize, linex, dropTarget.y + Constants.tileSize / 2, _dashOffset)
-    Gfx.drawGhostTile(_tile, dropTarget.x, dropTarget.y)
+    if (!_isPlacingBlock) {
+      var dropTarget = cellsToPixels(getDropTarget())
+      var linex = _x * Constants.tileSize + Constants.tileSize / 2
+      Gfx.drawDashedLine(linex, Constants.tileSize, linex, dropTarget.y + Constants.tileSize / 2, _dashOffset)
+      Gfx.drawGhostTile(_tile, dropTarget.x, dropTarget.y)
+    }
 
     for (block in _animatedBlocks) {
       Gfx.drawTile(block.tile, block.point.x, block.point.y)

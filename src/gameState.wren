@@ -31,7 +31,7 @@ class GameState {
     if (levelWidth == 0) levelWidth = levelString.count
     var levelHeight = levelString.split("\n").count
 
-    var xStart = Math.floor(Constants.mapWidth / 2) - Math.ceil(levelWidth / 2)
+    var xStart = Math.floor(Constants.mapWidth / 2) - Math.ceil(levelWidth / 2) + 1
     var yStart = Constants.mapHeight - levelHeight
 
     var x = xStart
@@ -66,6 +66,10 @@ class GameState {
       }
     }
     return true
+  }
+
+  isLevelFailed() {
+    return !isLevelClear() && _tileAllowances.all{|allowance| allowance == 0}
   }
 
   allCells {

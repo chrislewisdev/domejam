@@ -19,10 +19,10 @@ class LevelStartMode {
   }
 
   draw(dt) {
-    Canvas.rectfill(50, 100, 100, 20, Color.black)
-    Canvas.rect(50, 100, 100, 20, Color.white)
-    Canvas.print("Level %(_state.currentLevel + 2) / %(Constants.levels.count)", 56, 106, Color.white)
-    Gfx.scale2x(50, 100, 150, 120)
+    Canvas.rectfill(45, 100, 100, 20, Color.black)
+    Canvas.rect(45, 100, 100, 20, Color.white)
+    Canvas.print("Level %(_state.currentLevel < 8 ? "0" : "")%(_state.currentLevel + 2)/%(Constants.levels.count)", 51, 106, Color.white)
+    Gfx.scale2x(45, 100, 165, 120)
   }
 }
 

@@ -151,6 +151,7 @@ class PlayMode {
 
   update() {
     _controls.evaluate()
+    enforceAllowances()
 
     _fibers.each{|fiber| fiber.call()}
     _fibers = _fibers.where{|fiber| !fiber.isDone}.toList

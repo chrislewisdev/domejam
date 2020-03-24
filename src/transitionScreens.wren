@@ -2,7 +2,12 @@ import "graphics" for Canvas, Color
 import "./src/gfx" for Gfx
 import "./src/constants" for Constants
 
-class LevelStartMode {
+/**
+ * All the classes in this file are responsible for displaying some transitional screen e.g.
+ * between levels, when a level needs to be restarted, or when the game has been completed.
+ */
+
+class LevelStartScreen {
   construct new(state, gameInstance) {
     _state = state
     _timer = 100
@@ -12,6 +17,7 @@ class LevelStartMode {
   update() {
     _timer = _timer - 1
 
+    // We wait 100 frames before transition into gameplay.
     if (_timer <= 0) {
       _state.loadLevel(_state.currentLevel + 1)
       _gameInstance.play()
@@ -26,7 +32,10 @@ class LevelStartMode {
   }
 }
 
-class LevelFailedMode {
+/**
+ * Basically identical to the above but reloads the current level instead of loading the next one.
+ */
+class LevelFailedScreen {
   construct new(state, gameInstance) {
     _state = state
     _timer = 100
@@ -51,7 +60,10 @@ class LevelFailedMode {
   }
 }
 
-class GameFinishedMode {
+/**
+ * Once the game is over, display this congratulations message and nothing else until the player exits.
+ */
+class GameFinishedScreen {
   construct new() {}
 
   update() {}

@@ -21,12 +21,14 @@ class Game {
     __game = GameInstance.new()
 
     __controls = Controls.new().
+      // Since the base screen size of 400x240 is a bit small, let's make it easy for players to scale the window up with keys 1/2/3
       withAction(Action.new(Fn.new{ setScale(1) }).
         withMapping(KeyMapping.new("1"))).
       withAction(Action.new(Fn.new{ setScale(2) }).
         withMapping(KeyMapping.new("2"))).
       withAction(Action.new(Fn.new{ setScale(3) }).
         withMapping(KeyMapping.new("3"))).
+      // Pressing either Z or X will start the game
       withAction(Action.new(Fn.new{ startGame() }).
         withMapping(KeyMapping.new("Z")).
         withMapping(KeyMapping.new("X")))
@@ -41,6 +43,8 @@ class Game {
   }
 
   static update() {
+    // Allow the player to exit the game at any time
+    // This could be implemented using the Controls mappings above, but I hadn't written that yet :P
     if (Keyboard.isKeyDown("Escape")) {
       Process.exit()
     }
@@ -53,10 +57,11 @@ class Game {
   static draw(dt) {
     Canvas.cls()
 
+    // Draws borders around the screen and playing area that are always displayed
     Canvas.rect(0, 0, 400, 240, Color.white)
-    
     Canvas.rect(0, 0, 288, 240, Color.white)
 
+    // A (very) basic menu implementation. Once the game has begun, __started should always be true
     if (__started) {
       __game.draw(dt)
     } else {

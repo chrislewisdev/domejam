@@ -1,7 +1,13 @@
+/**
+ * Any common values that need to be shared across the rest of the game live here.
+ */
 class Constants {
-  static tileSize { 24 }
-  static mapWidth { 12 }
+  static tileSize { 24 }  // in pixels
+  static mapWidth { 12 }  // in 24x24 cells
   static mapHeight { 9 }
+  // Levels are defined as 4-item array with the following items:
+  // 1: A multi-line string denoting the layout of the level. s = sword, d = shield, b = bow, _ = empty, x = solid block
+  // 2 - 4. The number of each tile that the player is allowed to place in each level, in order of sword, shield, bow
   static levels {[
 ["
 s_s

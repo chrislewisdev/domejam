@@ -9,7 +9,7 @@ import "./src/block" for Block
 
 var MATCH_ANIMATION_TARGET = Point.new(0, 0)
 
-class PlayMode {
+class PlayScreen {
   construct new(state, gameInstance) {
     _state = state
     _gameInstance = gameInstance

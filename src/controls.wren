@@ -1,5 +1,13 @@
 import "input" for Keyboard
 
+/**
+ * Defines a simple model for input handling in the game. It goes like so:
+ * An Action defines a function that can be triggered by any number of KeyMappings, with 
+ * an associated cooldown (so that actions don't repeat too often while you hold a key)
+ * The Controls class groups together any number of Actions so that they can be evaluated each frame
+ * using the 'evaluate' function.
+ */
+
 class KeyMapping {
   construct new(key) {
     _key = key
@@ -25,6 +33,7 @@ class Action {
     _cooldownLength = cooldownLength
   }
 
+  // Enables us to build actions like Action.new().withMapping(mapping1).withMapping(mapping2)
   withMapping(mapping) {
     _mappings.add(mapping)
     return this
@@ -32,6 +41,7 @@ class Action {
 
   evaluate() {
     if (_mappings.any{|mapping| mapping.isActivated()}) {
+      // If a key is held, the cooldown will prevent it from firing every frame
       if (_cooldown == 0) {
         _cooldown = _cooldownLength
         _action.call()
@@ -39,6 +49,7 @@ class Action {
         _cooldown = _cooldown - 1
       }
     } else {
+      // If no keys are being pressed, we can reset the cooldown, so that when they press again the action will fire
       _cooldown = 0
     }
   }
